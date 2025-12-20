@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import type { Digest, Podcast } from '../../types/database';
+import type { Podcast } from '../../types/database';
 
 interface ProcessTranscriptFormProps {
-  digests: Digest[];
   podcasts: Podcast[];
   onSuccess: () => void;
 }
 
-export function ProcessTranscriptForm({ digests, podcasts, onSuccess }: ProcessTranscriptFormProps) {
+export function ProcessTranscriptForm({ podcasts, onSuccess }: ProcessTranscriptFormProps) {
   const [transcript, setTranscript] = useState('');
   const [podcastId, setPodcastId] = useState('');
   const [newPodcastName, setNewPodcastName] = useState('');

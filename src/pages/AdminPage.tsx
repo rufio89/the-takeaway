@@ -4,7 +4,7 @@ import { CreateDigestForm } from '../components/admin/CreateDigestForm';
 import { CreateIdeaForm } from '../components/admin/CreateIdeaForm';
 import { ManageDigests } from '../components/admin/ManageDigests';
 import { ProcessTranscriptForm } from '../components/admin/ProcessTranscriptForm';
-import { Plus, BookOpen, Lightbulb, List, Sparkles } from 'lucide-react';
+import { BookOpen, Lightbulb, List, Sparkles } from 'lucide-react';
 import type { Digest, Podcast, Category } from '../types/database';
 
 export function AdminPage() {
@@ -107,7 +107,7 @@ export function AdminPage() {
               onSuccess={fetchData}
             />
           ) : (
-            <ProcessTranscriptForm digests={digests} podcasts={podcasts} onSuccess={fetchData} />
+            <ProcessTranscriptForm podcasts={podcasts} onSuccess={fetchData} />
           )}
         </div>
       </div>
