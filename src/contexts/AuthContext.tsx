@@ -46,7 +46,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      setIsAdmin(data && data.role === 'admin');
+      if (data) {
+        setIsAdmin(data.role === 'admin');
+      } else {
+        setIsAdmin(false);
+      }
     } catch (err) {
       console.error('Error checking admin role:', err);
       setIsAdmin(false);

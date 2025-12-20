@@ -26,15 +26,13 @@ export function CreateDigestForm({ onSuccess }: CreateDigestFormProps) {
     setSuccess(false);
 
     try {
-      const insertData: Database['public']['Tables']['digests']['Insert'] = {
+      const { error} = await supabase.from('digests').insert({
         title,
         description: description || null,
         image_url: imageUrl || null,
         published_date: publishedDate,
         featured,
-      };
-
-      const { error } = await supabase.from('digests').insert(insertData);
+      } as Database['public']['Tables']['digests']['Insert']);
 
       if (error) throw error;
 

@@ -43,18 +43,16 @@ export function ManageDigests({ digests, onUpdate }: ManageDigestsProps) {
     setError(null);
 
     try {
-      const updateData: Database['public']['Tables']['digests']['Update'] = {
-        title: editForm.title,
-        description: editForm.description || null,
-        image_url: editForm.image_url || null,
-        published_date: editForm.published_date,
-        featured: editForm.featured,
-        updated_at: new Date().toISOString(),
-      };
-
       const { error } = await supabase
         .from('digests')
-        .update(updateData)
+        .update({
+          title: editForm.title,
+          description: editForm.description || null,
+          image_url: editForm.image_url || null,
+          published_date: editForm.published_date,
+          featured: editForm.featured,
+          updated_at: new Date().toISOString(),
+        } as Database['public']['Tables']['digests']['Update'])
         .eq('id', digestId);
 
       if (error) throw error;
