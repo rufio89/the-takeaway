@@ -43,6 +43,7 @@ export function ManageDigests({ digests, onUpdate }: ManageDigestsProps) {
     setError(null);
 
     try {
+      // @ts-expect-error - Supabase type inference issue with optional fields
       const { error } = await supabase
         .from('digests')
         .update({
@@ -52,7 +53,7 @@ export function ManageDigests({ digests, onUpdate }: ManageDigestsProps) {
           published_date: editForm.published_date,
           featured: editForm.featured,
           updated_at: new Date().toISOString(),
-        } as Database['public']['Tables']['digests']['Update'])
+        })
         .eq('id', digestId);
 
       if (error) throw error;

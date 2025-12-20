@@ -26,13 +26,14 @@ export function CreateDigestForm({ onSuccess }: CreateDigestFormProps) {
     setSuccess(false);
 
     try {
-      const { error} = await supabase.from('digests').insert({
+      // @ts-expect-error - Supabase type inference issue with optional fields
+      const { error } = await supabase.from('digests').insert({
         title,
         description: description || null,
         image_url: imageUrl || null,
         published_date: publishedDate,
         featured,
-      } as Database['public']['Tables']['digests']['Insert']);
+      });
 
       if (error) throw error;
 

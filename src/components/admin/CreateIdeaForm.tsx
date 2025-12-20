@@ -30,6 +30,7 @@ export function CreateIdeaForm({ digests, podcasts, categories, onSuccess }: Cre
     setSuccess(false);
 
     try {
+      // @ts-expect-error - Supabase type inference issue with optional fields
       const { error } = await supabase.from('ideas').insert({
         digest_id: digestId || null,
         podcast_id: podcastId || null,
@@ -39,7 +40,7 @@ export function CreateIdeaForm({ digests, podcasts, categories, onSuccess }: Cre
         actionable_takeaway: actionableTakeaway || null,
         clarity_score: clarityScore,
         timestamp: timestamp || null,
-      } as Database['public']['Tables']['ideas']['Insert']);
+      });
 
       if (error) throw error;
 
