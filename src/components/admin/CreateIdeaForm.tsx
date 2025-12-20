@@ -30,7 +30,7 @@ export function CreateIdeaForm({ digests, podcasts, categories, onSuccess }: Cre
     setSuccess(false);
 
     try {
-      const { error } = await supabase.from('ideas').insert({
+      const { error } = await supabase.from('ideas').insert([{
         digest_id: digestId || null,
         podcast_id: podcastId || null,
         category_id: categoryId || null,
@@ -39,7 +39,7 @@ export function CreateIdeaForm({ digests, podcasts, categories, onSuccess }: Cre
         actionable_takeaway: actionableTakeaway || null,
         clarity_score: clarityScore,
         timestamp: timestamp || null,
-      });
+      }]);
 
       if (error) throw error;
 

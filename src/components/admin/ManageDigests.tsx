@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Edit2, Trash2, Calendar, Lightbulb, Check, X, Loader2 } from 'lucide-react';
-import type { Digest } from '../../types/database';
+import type { Digest, Database } from '../../types/database';
 
 interface ManageDigestsProps {
   digests: Digest[];
@@ -43,16 +43,18 @@ export function ManageDigests({ digests, onUpdate }: ManageDigestsProps) {
     setError(null);
 
     try {
+      const updateData: Database['public']['Tables']['digests']['Update'] = {
+        title: editForm.title,
+        description: editForm.description || null,
+        image_url: editForm.image_url || null,
+        published_date: editForm.published_date,
+        featured: editForm.featured,
+        updated_at: new Date().toISOString(),
+      };
+
       const { error } = await supabase
         .from('digests')
-        .update({
-          title: editForm.title,
-          description: editForm.description || null,
-          image_url: editForm.image_url || null,
-          published_date: editForm.published_date,
-          featured: editForm.featured,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', digestId);
 
       if (error) throw error;

@@ -25,13 +25,13 @@ export function CreateDigestForm({ onSuccess }: CreateDigestFormProps) {
     setSuccess(false);
 
     try {
-      const { error } = await supabase.from('digests').insert({
+      const { error } = await supabase.from('digests').insert([{
         title,
         description: description || null,
         image_url: imageUrl || null,
         published_date: publishedDate,
         featured,
-      });
+      }]);
 
       if (error) throw error;
 

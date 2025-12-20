@@ -36,12 +36,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error('Error checking admin role:', error);
+        // User might not have a role yet, default to not admin
+        if (error.code === 'PGRST116') {
+          console.log('User has no role assigned yet');
+        } else {
+          console.error('Error checking admin role:', error);
+        }
         setIsAdmin(false);
         return;
       }
 
-      setIsAdmin(data?.role === 'admin');
+      setIsAdmin(data && data.role === 'admin');
     } catch (err) {
       console.error('Error checking admin role:', err);
       setIsAdmin(false);
