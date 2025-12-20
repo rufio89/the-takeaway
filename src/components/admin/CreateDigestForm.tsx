@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Check, Loader2 } from 'lucide-react';
+import type { Database } from '../../types/database';
 
 interface CreateDigestFormProps {
   onSuccess: () => void;
@@ -25,13 +26,15 @@ export function CreateDigestForm({ onSuccess }: CreateDigestFormProps) {
     setSuccess(false);
 
     try {
-      const { error } = await supabase.from('digests').insert([{
+      const insertData: Database['public']['Tables']['digests']['Insert'] = {
         title,
         description: description || null,
         image_url: imageUrl || null,
         published_date: publishedDate,
         featured,
-      }]);
+      };
+
+      const { error } = await supabase.from('digests').insert(insertData);
 
       if (error) throw error;
 

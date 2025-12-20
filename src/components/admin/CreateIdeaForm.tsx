@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Check, Loader2 } from 'lucide-react';
-import type { Digest, Podcast, Category } from '../../types/database';
+import type { Digest, Podcast, Category, Database } from '../../types/database';
 
 interface CreateIdeaFormProps {
   digests: Digest[];
@@ -30,7 +30,7 @@ export function CreateIdeaForm({ digests, podcasts, categories, onSuccess }: Cre
     setSuccess(false);
 
     try {
-      const { error } = await supabase.from('ideas').insert([{
+      const insertData: Database['public']['Tables']['ideas']['Insert'] = {
         digest_id: digestId || null,
         podcast_id: podcastId || null,
         category_id: categoryId || null,
@@ -39,7 +39,9 @@ export function CreateIdeaForm({ digests, podcasts, categories, onSuccess }: Cre
         actionable_takeaway: actionableTakeaway || null,
         clarity_score: clarityScore,
         timestamp: timestamp || null,
-      }]);
+      };
+
+      const { error } = await supabase.from('ideas').insert(insertData);
 
       if (error) throw error;
 
