@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Check, Loader2 } from 'lucide-react';
-import type { Database } from '../../types/database';
 
 interface CreateDigestFormProps {
   onSuccess: () => void;
@@ -26,7 +25,6 @@ export function CreateDigestForm({ onSuccess }: CreateDigestFormProps) {
     setSuccess(false);
 
     try {
-      // @ts-expect-error - Supabase type inference issue with optional fields
       const { error } = await supabase.from('digests').insert({
         title,
         description: description || null,

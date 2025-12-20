@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Edit2, Trash2, Calendar, Lightbulb, Check, X, Loader2 } from 'lucide-react';
-import type { Digest, Database } from '../../types/database';
+import type { Digest } from '../../types/database';
 
 interface ManageDigestsProps {
   digests: Digest[];
@@ -43,7 +43,6 @@ export function ManageDigests({ digests, onUpdate }: ManageDigestsProps) {
     setError(null);
 
     try {
-      // @ts-expect-error - Supabase type inference issue with optional fields
       const { error } = await supabase
         .from('digests')
         .update({
