@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { ChevronDown, ChevronRight, Lightbulb } from 'lucide-react';
 
 interface IdeaMapProps {
   thesis: string;
@@ -13,12 +14,42 @@ interface IdeaMapProps {
   }>;
 }
 
+// Custom hook for responsive breakpoint detection
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < breakpoint);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
 export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedIdea, setSelectedIdea] = useState<string | null>(null);
   const [hoveredIdea, setHoveredIdea] = useState<string | null>(null);
+  const [expandedIdeas, setExpandedIdeas] = useState<Set<string>>(new Set());
+  const isMobile = useIsMobile();
+
+  const toggleIdea = (id: string) => {
+    setExpandedIdeas(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
+    // Skip D3 rendering on mobile - we use the list view instead
+    if (isMobile) return;
     if (!svgRef.current || !thesis || !ideas.length) return;
 
     // Clear previous render
@@ -236,7 +267,7 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
       });
     });
 
-  }, [thesis, ideas]);
+  }, [thesis, ideas, isMobile]);
 
   if (!thesis || !ideas.length) {
     return null;
@@ -244,6 +275,129 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
 
   const selectedIdeaData = ideas.find(idea => idea.id === selectedIdea || idea.id === hoveredIdea);
 
+  // Mobile view: Expandable list of key ideas
+  if (isMobile) {
+    return (
+      <div className="my-6">
+        {/* Thesis/Central Theme */}
+        <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-5 mb-4 shadow-lg">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+              <Lightbulb className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-xs font-medium text-indigo-200 uppercase tracking-wide">Central Theme</span>
+          </div>
+          <h3 className="text-xl font-bold text-white leading-tight">{thesis}</h3>
+        </div>
+
+        {/* Expandable Key Ideas */}
+        <div className="space-y-3">
+          <p className="text-sm text-gray-500 px-1">
+            Tap any idea to expand and learn more
+          </p>
+          {ideas.map((idea, index) => {
+            const isExpanded = expandedIdeas.has(idea.id);
+            return (
+              <div
+                key={idea.id}
+                className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
+              >
+                {/* Idea Header - Tappable */}
+                <button
+                  onClick={() => toggleIdea(idea.id)}
+                  className="w-full p-4 flex items-start gap-3 text-left active:bg-slate-50 transition-colors"
+                >
+                  <div className="flex-shrink-0 w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-base font-semibold text-gray-900 leading-snug">
+                      {idea.title}
+                    </h4>
+                  </div>
+                  <div className="flex-shrink-0 text-gray-400">
+                    {isExpanded ? (
+                      <ChevronDown className="w-5 h-5" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5" />
+                    )}
+                  </div>
+                </button>
+
+                {/* Expanded Content */}
+                {isExpanded && (
+                  <div className="px-4 pb-4 pt-0 border-t border-slate-100">
+                    <div className="pl-10 space-y-4">
+                      {/* Summary */}
+                      <div className="pt-3">
+                        <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Summary</h5>
+                        <div className="prose prose-sm max-w-none">
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              p: ({ children }) => (
+                                <p className="text-sm leading-relaxed mb-3 text-gray-700">{children}</p>
+                              ),
+                              strong: ({ children }) => (
+                                <strong className="font-semibold text-gray-900">{children}</strong>
+                              ),
+                              em: ({ children }) => (
+                                <em className="italic">{children}</em>
+                              ),
+                            }}
+                          >
+                            {idea.summary}
+                          </ReactMarkdown>
+                        </div>
+                      </div>
+
+                      {/* Actionable Takeaway */}
+                      {idea.actionable_takeaway && (
+                        <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
+                          <h5 className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-2">
+                            Actionable Takeaway
+                          </h5>
+                          <div className="prose prose-sm max-w-none">
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                p: ({ children }) => (
+                                  <p className="text-sm leading-relaxed mb-2 text-amber-900 last:mb-0">{children}</p>
+                                ),
+                                strong: ({ children }) => (
+                                  <strong className="font-semibold text-amber-900">{children}</strong>
+                                ),
+                                em: ({ children }) => (
+                                  <em className="italic">{children}</em>
+                                ),
+                                ol: ({ children }) => (
+                                  <ol className="list-decimal pl-4 space-y-1 text-sm text-amber-900">{children}</ol>
+                                ),
+                                ul: ({ children }) => (
+                                  <ul className="list-disc pl-4 space-y-1 text-sm text-amber-900">{children}</ul>
+                                ),
+                                li: ({ children }) => (
+                                  <li className="text-sm text-amber-900">{children}</li>
+                                ),
+                              }}
+                            >
+                              {idea.actionable_takeaway}
+                            </ReactMarkdown>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop view: D3 Semantic Graph
   return (
     <div className="my-8">
       <div className="bg-gradient-to-br from-slate-50 to-indigo-50/30 rounded-xl border border-slate-200 p-8">
