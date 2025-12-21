@@ -165,11 +165,16 @@ export function DigestDetailPage() {
           ideas={digest.ideas || []}
         />
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-4">
           {digest.ideas && digest.ideas.length > 0 ? (
-            <div className="space-y-8">
-              {digest.ideas.map((idea) => <IdeaCard key={idea.id} idea={idea} />)}
-            </div>
+            <>
+              <p className="text-sm text-gray-500 px-1">
+                Tap any idea to expand and see details
+              </p>
+              <div className="space-y-3">
+                {digest.ideas.map((idea) => <IdeaCard key={idea.id} idea={idea} />)}
+              </div>
+            </>
           ) : (
             <div className="bg-gray-100 rounded-lg p-8 text-center">
               <p className="text-gray-600">No ideas in this digest yet.</p>

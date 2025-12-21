@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ChevronDown, ChevronRight, Lightbulb } from 'lucide-react';
 
 interface IdeaMapProps {
   thesis: string;
@@ -32,33 +31,26 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedIdea, setSelectedIdea] = useState<string | null>(null);
   const [hoveredIdea, setHoveredIdea] = useState<string | null>(null);
-  const [expandedIdeas, setExpandedIdeas] = useState<Set<string>>(new Set());
   const isMobile = useIsMobile();
 
-  const toggleIdea = (id: string) => {
-    setExpandedIdeas(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
   useEffect(() => {
-    // Skip D3 rendering on mobile - we use the list view instead
-    if (isMobile) return;
     if (!svgRef.current || !thesis || !ideas.length) return;
 
     // Clear previous render
     d3.select(svgRef.current).selectAll('*').remove();
 
-    const width = 900;
-    const height = 500;
+    // Responsive dimensions - bigger on mobile for readability
+    const width = isMobile ? 600 : 900;
+    const height = isMobile ? 600 : 500;
     const centerX = width / 2;
     const centerY = height / 2;
+
+    // Larger radius and fonts on mobile
+    const radius = isMobile ? 220 : 180;
+    const thesisFontSize = isMobile ? 16 : 12;
+    const ideaFontSize = isMobile ? 14 : 10;
+    const thesisMaxWidth = isMobile ? 180 : 140;
+    const ideaMaxWidth = isMobile ? 140 : 100;
 
     const svg = d3.select(svgRef.current)
       .attr('width', width)
@@ -71,7 +63,6 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
 
     // Calculate positions for a clean radial layout
     const angleStep = (2 * Math.PI) / ideas.length;
-    const radius = 180;
 
     // Create node data
     const nodes = [
@@ -117,7 +108,7 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
       .attr('x2', d => d.target.x)
       .attr('y2', d => d.target.y)
       .attr('stroke', 'url(#link-gradient)')
-      .attr('stroke-width', 1.5)
+      .attr('stroke-width', isMobile ? 2 : 1.5)
       .attr('stroke-dasharray', '4,4');
 
     // Draw nodes with text first to calculate bubble sizes
@@ -133,9 +124,9 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
     nodeGroups.each(function(d) {
       const node = d3.select(this);
       const words = d.label.split(' ');
-      const maxWidth = d.isThesis ? 140 : 100;
+      const maxWidth = d.isThesis ? thesisMaxWidth : ideaMaxWidth;
       const lineHeight = 1.2;
-      const fontSize = d.isThesis ? 12 : 10;
+      const fontSize = d.isThesis ? thesisFontSize : ideaFontSize;
 
       let line: string[] = [];
       let lines: string[] = [];
@@ -187,7 +178,7 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
     nodeGroups.each(function(d, i) {
       const node = d3.select(this);
       const data = textData[i];
-      const padding = d.isThesis ? 20 : 16;
+      const padding = d.isThesis ? (isMobile ? 24 : 20) : (isMobile ? 20 : 16);
       const bubbleWidth = data.width + padding * 2;
       const bubbleHeight = data.height + padding * 1.5;
 
@@ -245,7 +236,7 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
     nodeGroups.each(function(d, i) {
       const node = d3.select(this);
       const data = textData[i];
-      const fontSize = d.isThesis ? 12 : 10;
+      const fontSize = d.isThesis ? thesisFontSize : ideaFontSize;
       const lineHeight = 1.2;
 
       const textGroup = node.append('text')
@@ -275,153 +266,30 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
 
   const selectedIdeaData = ideas.find(idea => idea.id === selectedIdea || idea.id === hoveredIdea);
 
-  // Mobile view: Expandable list of key ideas
-  if (isMobile) {
-    return (
-      <div className="my-6">
-        {/* Thesis/Central Theme */}
-        <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-5 mb-4 shadow-lg">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-              <Lightbulb className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-xs font-medium text-indigo-200 uppercase tracking-wide">Central Theme</span>
-          </div>
-          <h3 className="text-xl font-bold text-white leading-tight">{thesis}</h3>
-        </div>
-
-        {/* Expandable Key Ideas */}
-        <div className="space-y-3">
-          <p className="text-sm text-gray-500 px-1">
-            Tap any idea to expand and learn more
-          </p>
-          {ideas.map((idea, index) => {
-            const isExpanded = expandedIdeas.has(idea.id);
-            return (
-              <div
-                key={idea.id}
-                className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
-              >
-                {/* Idea Header - Tappable */}
-                <button
-                  onClick={() => toggleIdea(idea.id)}
-                  className="w-full p-4 flex items-start gap-3 text-left active:bg-slate-50 transition-colors"
-                >
-                  <div className="flex-shrink-0 w-7 h-7 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-sm font-semibold">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-base font-semibold text-gray-900 leading-snug">
-                      {idea.title}
-                    </h4>
-                  </div>
-                  <div className="flex-shrink-0 text-gray-400">
-                    {isExpanded ? (
-                      <ChevronDown className="w-5 h-5" />
-                    ) : (
-                      <ChevronRight className="w-5 h-5" />
-                    )}
-                  </div>
-                </button>
-
-                {/* Expanded Content */}
-                {isExpanded && (
-                  <div className="px-4 pb-4 pt-0 border-t border-slate-100">
-                    <div className="pl-10 space-y-4">
-                      {/* Summary */}
-                      <div className="pt-3">
-                        <h5 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Summary</h5>
-                        <div className="prose prose-sm max-w-none">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            components={{
-                              p: ({ children }) => (
-                                <p className="text-sm leading-relaxed mb-3 text-gray-700">{children}</p>
-                              ),
-                              strong: ({ children }) => (
-                                <strong className="font-semibold text-gray-900">{children}</strong>
-                              ),
-                              em: ({ children }) => (
-                                <em className="italic">{children}</em>
-                              ),
-                            }}
-                          >
-                            {idea.summary}
-                          </ReactMarkdown>
-                        </div>
-                      </div>
-
-                      {/* Actionable Takeaway */}
-                      {idea.actionable_takeaway && (
-                        <div className="bg-amber-50 rounded-lg p-3 border border-amber-100">
-                          <h5 className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-2">
-                            Actionable Takeaway
-                          </h5>
-                          <div className="prose prose-sm max-w-none">
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
-                              components={{
-                                p: ({ children }) => (
-                                  <p className="text-sm leading-relaxed mb-2 text-amber-900 last:mb-0">{children}</p>
-                                ),
-                                strong: ({ children }) => (
-                                  <strong className="font-semibold text-amber-900">{children}</strong>
-                                ),
-                                em: ({ children }) => (
-                                  <em className="italic">{children}</em>
-                                ),
-                                ol: ({ children }) => (
-                                  <ol className="list-decimal pl-4 space-y-1 text-sm text-amber-900">{children}</ol>
-                                ),
-                                ul: ({ children }) => (
-                                  <ul className="list-disc pl-4 space-y-1 text-sm text-amber-900">{children}</ul>
-                                ),
-                                li: ({ children }) => (
-                                  <li className="text-sm text-amber-900">{children}</li>
-                                ),
-                              }}
-                            >
-                              {idea.actionable_takeaway}
-                            </ReactMarkdown>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  // Desktop view: D3 Semantic Graph
   return (
     <div className="my-8">
-      <div className="bg-gradient-to-br from-slate-50 to-indigo-50/30 rounded-xl border border-slate-200 p-8">
-        <div className="text-center mb-8">
+      <div className="bg-gradient-to-br from-slate-50 to-indigo-50/30 rounded-xl border border-slate-200 p-4 sm:p-8">
+        <div className="text-center mb-4 sm:mb-8">
           <h3 className="text-lg font-semibold text-gray-900 mb-1">Semantic Graph</h3>
           <p className="text-xs text-gray-500">
-            Click on any idea to see details
+            {isMobile ? 'Tap on any idea to see details' : 'Click on any idea to see details'}
           </p>
         </div>
-        <div className="flex justify-center">
+        <div className="flex justify-center overflow-x-auto">
           <svg ref={svgRef} className="idea-map"></svg>
         </div>
       </div>
 
       {/* Detail panel */}
       {selectedIdeaData && (
-        <div className="mt-4 bg-white rounded-xl border-2 border-primary-300 p-6 shadow-lg">
+        <div className="mt-4 bg-white rounded-xl border-2 border-primary-300 p-4 sm:p-6 shadow-lg">
           <div className="flex items-start justify-between mb-4">
-            <h4 className="text-lg font-semibold text-gray-900 flex-1">
+            <h4 className="text-base sm:text-lg font-semibold text-gray-900 flex-1">
               {selectedIdeaData.title}
             </h4>
             <button
               onClick={() => setSelectedIdea(null)}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-600 transition-colors ml-2"
               aria-label="Close"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
