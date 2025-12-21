@@ -46,28 +46,36 @@ app.post('/api/process-transcript', async (req, res) => {
       messages: [
         {
           role: 'user',
-          content: `You are an expert at analyzing podcast transcripts and extracting actionable insights for busy entrepreneurs.
+          content: `Build a learning-optimized idea map from this podcast transcript.
 
-Analyze the following podcast transcript and extract 3-7 high-value ideas. For each idea, provide:
+Goal: Convert linear audio into a small, explorable mental model that improves understanding and recall.
 
-1. **title**: A concise, compelling title (5-10 words)
-2. **summary**: A clear explanation of the concept (2-4 paragraphs in markdown format, use **bold** for key terms, bullet lists where appropriate)
-3. **actionable_takeaway**: Specific steps someone can take to apply this insight (1-2 paragraphs in markdown, can use numbered lists)
-4. **clarity_score**: Rate 1-10 how clear and actionable this insight is (10 = crystal clear and immediately actionable)
-5. **category**: One of: Productivity, Marketing, Leadership, Strategy, Mindset, Innovation
+Rules:
+• Extract 1 central thesis (≤ 8 words)
+• Extract 3–5 supporting ideas that directly support the thesis (≤ 8 words each)
+• Do not include tools, anecdotes, or examples
+• Ideas must be conceptual, not procedural
+• Enforce hierarchy: thesis → ideas
+• Max 6 total nodes
 
-Format your response as a JSON array of idea objects. Make sure the markdown is properly formatted with line breaks between paragraphs.
+For each supporting idea, also provide:
+1. **summary**: A clear explanation of the concept (2-4 paragraphs in markdown format, use **bold** for key terms)
+2. **actionable_takeaway**: Specific steps to apply this insight (1-2 paragraphs in markdown)
+3. **clarity_score**: Rate 1-10 how clear and actionable this insight is
+4. **category**: One of: Productivity, Marketing, Leadership, Strategy, Mindset, Innovation
 
 Podcast Transcript:
 ${transcript}
 
 Respond ONLY with valid JSON in this exact format:
 {
+  "thesis": "Compound growth beats linear progress",
+  "description": "A learning-optimized breakdown of key insights from this podcast episode, structured to improve understanding and recall.",
   "ideas": [
     {
-      "title": "The 80/20 Rule for Decision Making",
-      "summary": "Focus on the 20% of decisions that drive 80% of outcomes...\\n\\n**Key points:**\\n- Most decisions are reversible\\n- Use bold for emphasis",
-      "actionable_takeaway": "Try this framework:\\n1. Identify your top 3 decisions\\n2. Schedule time for each",
+      "title": "Small improvements create exponential returns",
+      "summary": "**Compounding** works through consistent marginal gains...\\n\\nKey concept here.",
+      "actionable_takeaway": "Start with:\\n1. Identify one 1% improvement\\n2. Track it daily",
       "clarity_score": 9,
       "category": "Strategy"
     }
@@ -86,6 +94,8 @@ Respond ONLY with valid JSON in this exact format:
     // Parse the JSON response
     const parsed = JSON.parse(responseText);
     const ideas = parsed.ideas;
+    const thesis = parsed.thesis;
+    const generatedDescription = parsed.description;
 
     if (!ideas || ideas.length === 0) {
       return res.status(400).json({ error: 'No ideas extracted from transcript' });
@@ -111,12 +121,12 @@ Respond ONLY with valid JSON in this exact format:
       podcast = newPodcast;
     }
 
-    // Create digest
+    // Create digest with AI-generated title and description
     const { data: newDigest, error: digestError } = await supabase
       .from('digests')
       .insert({
-        title: digestTitle || `${podcastName || 'Podcast'} Digest`,
-        description: digestDescription || `Key insights extracted from ${podcastName || 'podcast transcript'}`,
+        title: digestTitle || thesis || `${podcastName || 'Podcast'} Digest`,
+        description: digestDescription || generatedDescription || `Key insights extracted from ${podcastName || 'podcast transcript'}`,
         image_url: digestImageUrl || null,
       })
       .select()
