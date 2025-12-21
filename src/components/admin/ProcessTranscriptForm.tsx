@@ -12,7 +12,6 @@ export function ProcessTranscriptForm({ podcasts, onSuccess }: ProcessTranscript
   const [newPodcastName, setNewPodcastName] = useState('');
   const [newPodcastHost, setNewPodcastHost] = useState('');
   const [digestTitle, setDigestTitle] = useState('');
-  const [digestDescription, setDigestDescription] = useState('');
   const [digestImageUrl, setDigestImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +35,6 @@ export function ProcessTranscriptForm({ podcasts, onSuccess }: ProcessTranscript
           podcastName: newPodcastName || undefined,
           podcastHost: newPodcastHost || undefined,
           digestTitle: digestTitle || undefined,
-          digestDescription: digestDescription || undefined,
           digestImageUrl: digestImageUrl || undefined,
         }),
       });
@@ -58,7 +56,6 @@ export function ProcessTranscriptForm({ podcasts, onSuccess }: ProcessTranscript
       setNewPodcastName('');
       setNewPodcastHost('');
       setDigestTitle('');
-      setDigestDescription('');
       setDigestImageUrl('');
 
       // Refresh data
@@ -116,54 +113,45 @@ export function ProcessTranscriptForm({ podcasts, onSuccess }: ProcessTranscript
         </p>
       </div>
 
-      <div>
-        <label htmlFor="digestTitle" className="block text-sm font-medium text-gray-700 mb-2">
-          Digest Title
-        </label>
-        <input
-          type="text"
-          id="digestTitle"
-          value={digestTitle}
-          onChange={(e) => setDigestTitle(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          placeholder="Weekly Insights #12"
-        />
-        <p className="mt-1 text-xs text-gray-500">
-          Optional. Defaults to "[Podcast Name] Digest" if not provided.
-        </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="digestTitle" className="block text-sm font-medium text-gray-700 mb-2">
+            Digest Title
+          </label>
+          <input
+            type="text"
+            id="digestTitle"
+            value={digestTitle}
+            onChange={(e) => setDigestTitle(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            placeholder="Weekly Insights #12"
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            Optional. Defaults to AI-generated thesis if not provided.
+          </p>
+        </div>
+
+        <div>
+          <label htmlFor="digestImageUrl" className="block text-sm font-medium text-gray-700 mb-2">
+            Cover Image URL
+          </label>
+          <input
+            type="url"
+            id="digestImageUrl"
+            value={digestImageUrl}
+            onChange={(e) => setDigestImageUrl(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            placeholder="https://images.unsplash.com/photo-..."
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            Optional. Add a cover image to make the digest stand out.
+          </p>
+        </div>
       </div>
 
-      <div>
-        <label htmlFor="digestDescription" className="block text-sm font-medium text-gray-700 mb-2">
-          Digest Description
-        </label>
-        <textarea
-          id="digestDescription"
-          value={digestDescription}
-          onChange={(e) => setDigestDescription(e.target.value)}
-          rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          placeholder="A curated collection of actionable insights..."
-        />
-        <p className="mt-1 text-xs text-gray-500">
-          Optional. A brief description of what this digest contains.
-        </p>
-      </div>
-
-      <div>
-        <label htmlFor="digestImageUrl" className="block text-sm font-medium text-gray-700 mb-2">
-          Digest Cover Image URL
-        </label>
-        <input
-          type="url"
-          id="digestImageUrl"
-          value={digestImageUrl}
-          onChange={(e) => setDigestImageUrl(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          placeholder="https://images.unsplash.com/photo-..."
-        />
-        <p className="mt-1 text-xs text-gray-500">
-          Optional. Add a cover image to make the digest stand out.
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p className="text-sm text-blue-800">
+          <strong>Note:</strong> The digest description will be automatically generated by AI from the transcript content.
         </p>
       </div>
 

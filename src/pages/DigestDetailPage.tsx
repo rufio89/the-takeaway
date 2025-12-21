@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { supabase } from '../lib/supabase';
 import { IdeaCard } from '../components/IdeaCard';
+import { IdeaMap } from '../components/IdeaMap';
 import type { DigestWithIdeas } from '../types/database';
 import { Loader2, ArrowLeft, Calendar } from 'lucide-react';
 
@@ -12,6 +13,7 @@ export function DigestDetailPage() {
   const [digest, setDigest] = useState<DigestWithIdeas | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'map' | 'ideas'>('map');
 
   useEffect(() => {
     if (id) {
@@ -126,20 +128,55 @@ export function DigestDetailPage() {
         )}
       </div>
 
-      <div className="space-y-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Key Ideas ({digest.ideas?.length || 0})
-        </h2>
-        {digest.ideas && digest.ideas.length > 0 ? (
-          <div className="space-y-8">
-            {digest.ideas.map((idea) => <IdeaCard key={idea.id} idea={idea} />)}
-          </div>
-        ) : (
-          <div className="bg-gray-100 rounded-lg p-8 text-center">
-            <p className="text-gray-600">No ideas in this digest yet.</p>
-          </div>
-        )}
+      {/* Tabs */}
+      <div className="border-b border-gray-200 mb-8">
+        <nav className="flex gap-8" aria-label="Tabs">
+          <button
+            onClick={() => setActiveTab('map')}
+            className={`
+              pb-4 px-1 border-b-2 font-medium text-sm transition-colors
+              ${activeTab === 'map'
+                ? 'border-primary-600 text-primary-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }
+            `}
+          >
+            Semantic Graph
+          </button>
+          <button
+            onClick={() => setActiveTab('ideas')}
+            className={`
+              pb-4 px-1 border-b-2 font-medium text-sm transition-colors
+              ${activeTab === 'ideas'
+                ? 'border-primary-600 text-primary-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }
+            `}
+          >
+            Key Ideas ({digest.ideas?.length || 0})
+          </button>
+        </nav>
       </div>
+
+      {/* Tab Content */}
+      {activeTab === 'map' ? (
+        <IdeaMap
+          thesis={digest.title}
+          ideas={digest.ideas || []}
+        />
+      ) : (
+        <div className="space-y-8">
+          {digest.ideas && digest.ideas.length > 0 ? (
+            <div className="space-y-8">
+              {digest.ideas.map((idea) => <IdeaCard key={idea.id} idea={idea} />)}
+            </div>
+          ) : (
+            <div className="bg-gray-100 rounded-lg p-8 text-center">
+              <p className="text-gray-600">No ideas in this digest yet.</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
