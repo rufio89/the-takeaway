@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface IdeaMapProps {
   thesis: string;
@@ -277,16 +279,55 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
           <div className="space-y-4">
             <div>
               <h5 className="text-sm font-semibold text-gray-700 mb-2">Summary</h5>
-              <div className="text-sm text-gray-600 prose prose-sm max-w-none">
-                {selectedIdeaData.summary}
+              <div className="notion-content prose prose-sm max-w-none">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ children }) => (
+                      <p className="text-sm leading-relaxed mb-3 text-gray-700">{children}</p>
+                    ),
+                    strong: ({ children }) => (
+                      <strong className="font-semibold text-gray-900">{children}</strong>
+                    ),
+                    em: ({ children }) => (
+                      <em className="italic">{children}</em>
+                    ),
+                  }}
+                >
+                  {selectedIdeaData.summary}
+                </ReactMarkdown>
               </div>
             </div>
 
             {selectedIdeaData.actionable_takeaway && (
               <div>
                 <h5 className="text-sm font-semibold text-gray-700 mb-2">Actionable Takeaway</h5>
-                <div className="text-sm text-gray-600 prose prose-sm max-w-none">
-                  {selectedIdeaData.actionable_takeaway}
+                <div className="notion-content prose prose-sm max-w-none">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children }) => (
+                        <p className="text-sm leading-relaxed mb-3 text-gray-700">{children}</p>
+                      ),
+                      strong: ({ children }) => (
+                        <strong className="font-semibold text-gray-900">{children}</strong>
+                      ),
+                      em: ({ children }) => (
+                        <em className="italic">{children}</em>
+                      ),
+                      ol: ({ children }) => (
+                        <ol className="list-decimal pl-5 space-y-1 text-sm text-gray-700">{children}</ol>
+                      ),
+                      ul: ({ children }) => (
+                        <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">{children}</ul>
+                      ),
+                      li: ({ children }) => (
+                        <li className="text-sm text-gray-700">{children}</li>
+                      ),
+                    }}
+                  >
+                    {selectedIdeaData.actionable_takeaway}
+                  </ReactMarkdown>
                 </div>
               </div>
             )}

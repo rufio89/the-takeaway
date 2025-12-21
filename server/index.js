@@ -31,7 +31,7 @@ app.get('/api/health', (_req, res) => {
 // Process transcript endpoint
 app.post('/api/process-transcript', async (req, res) => {
   try {
-    const { transcript, podcastId, podcastName, podcastHost, digestTitle, digestDescription, digestImageUrl } = req.body;
+    const { transcript, podcastId, podcastName, podcastHost, digestTitle, digestImageUrl } = req.body;
 
     if (!transcript) {
       return res.status(400).json({ error: 'Transcript is required' });
@@ -64,13 +64,16 @@ For each supporting idea, also provide:
 3. **clarity_score**: Rate 1-10 how clear and actionable this insight is
 4. **category**: One of: Productivity, Marketing, Leadership, Strategy, Mindset, Innovation
 
+Also provide:
+• **description**: A compelling 1-2 sentence description of what makes this episode valuable. Focus on the main insight or transformation the listener will gain. Make it specific to this episode's content.
+
 Podcast Transcript:
 ${transcript}
 
 Respond ONLY with valid JSON in this exact format:
 {
   "thesis": "Compound growth beats linear progress",
-  "description": "A learning-optimized breakdown of key insights from this podcast episode, structured to improve understanding and recall.",
+  "description": "Discover how tiny daily improvements compound into extraordinary results over time, and why most people fail to harness this exponential power.",
   "ideas": [
     {
       "title": "Small improvements create exponential returns",
@@ -87,6 +90,7 @@ Respond ONLY with valid JSON in this exact format:
 
     let responseText = message.content[0].text;
     console.log('Claude response received');
+    console.log('Raw response:', responseText.substring(0, 500)); // Log first 500 chars
 
     // Remove markdown code blocks if present
     responseText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
@@ -96,6 +100,10 @@ Respond ONLY with valid JSON in this exact format:
     const ideas = parsed.ideas;
     const thesis = parsed.thesis;
     const generatedDescription = parsed.description;
+
+    console.log('Parsed thesis:', thesis);
+    console.log('Parsed description:', generatedDescription);
+    console.log('Ideas count:', ideas?.length);
 
     if (!ideas || ideas.length === 0) {
       return res.status(400).json({ error: 'No ideas extracted from transcript' });
@@ -126,7 +134,7 @@ Respond ONLY with valid JSON in this exact format:
       .from('digests')
       .insert({
         title: digestTitle || thesis || `${podcastName || 'Podcast'} Digest`,
-        description: digestDescription || generatedDescription || `Key insights extracted from ${podcastName || 'podcast transcript'}`,
+        description: generatedDescription || `Key insights extracted from ${podcastName || 'podcast transcript'}`,
         image_url: digestImageUrl || null,
       })
       .select()

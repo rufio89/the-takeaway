@@ -31,7 +31,7 @@ export function ProcessTranscriptForm({ podcasts, onSuccess }: ProcessTranscript
         },
         body: JSON.stringify({
           transcript,
-          podcastId: podcastId || undefined,
+          podcastId: podcastId && podcastId !== 'new' ? podcastId : undefined,
           podcastName: newPodcastName || undefined,
           podcastHost: newPodcastHost || undefined,
           digestTitle: digestTitle || undefined,
