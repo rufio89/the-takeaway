@@ -86,9 +86,9 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
     nodeGroups.each(function(d) {
       const node = d3.select(this);
       const words = d.label.split(' ');
-      const maxWidth = d.isThesis ? 140 : 100;
-      const lineHeight = 1.2;
-      const fontSize = d.isThesis ? 12 : 10;
+      const maxWidth = d.isThesis ? 180 : 140;
+      const lineHeight = 1.3;
+      const fontSize = d.isThesis ? 16 : 13;
 
       let line: string[] = [];
       let lines: string[] = [];
@@ -140,9 +140,9 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
     nodeGroups.each(function(d, i) {
       const node = d3.select(this);
       const data = textData[i];
-      const padding = d.isThesis ? 20 : 16;
+      const padding = d.isThesis ? 24 : 20;
       const bubbleWidth = data.width + padding * 2;
-      const bubbleHeight = data.height + padding * 1.5;
+      const bubbleHeight = data.height + padding * 2;
 
       // Rounded rectangle bubble
       const rect = node.insert('rect', ':first-child')
@@ -198,8 +198,8 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
     nodeGroups.each(function(d, i) {
       const node = d3.select(this);
       const data = textData[i];
-      const fontSize = d.isThesis ? 12 : 10;
-      const lineHeight = 1.2;
+      const fontSize = d.isThesis ? 16 : 13;
+      const lineHeight = 1.3;
 
       const textGroup = node.append('text')
         .attr('text-anchor', 'middle')
