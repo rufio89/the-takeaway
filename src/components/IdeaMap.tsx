@@ -61,22 +61,6 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
       target: nodes[i + 1]
     }));
 
-    // Draw links with gradient
-    const defs = svg.append('defs');
-    const gradient = defs.append('linearGradient')
-      .attr('id', 'link-gradient')
-      .attr('gradientUnits', 'userSpaceOnUse');
-
-    gradient.append('stop')
-      .attr('offset', '0%')
-      .attr('stop-color', '#6366f1')
-      .attr('stop-opacity', 0.6);
-
-    gradient.append('stop')
-      .attr('offset', '100%')
-      .attr('stop-color', '#818cf8')
-      .attr('stop-opacity', 0.3);
-
     // Draw edges
     g.selectAll('line')
       .data(links)
@@ -85,9 +69,9 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
       .attr('y1', d => d.source.y)
       .attr('x2', d => d.target.x)
       .attr('y2', d => d.target.y)
-      .attr('stroke', 'url(#link-gradient)')
-      .attr('stroke-width', 1.5)
-      .attr('stroke-dasharray', '4,4');
+      .attr('stroke', '#d1d5db')
+      .attr('stroke-width', 1)
+      .attr('stroke-dasharray', '2,3');
 
     // Draw nodes with text first to calculate bubble sizes
     const nodeGroups = g.selectAll('g.node')
@@ -166,12 +150,12 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
         .attr('y', -bubbleHeight / 2)
         .attr('width', bubbleWidth)
         .attr('height', bubbleHeight)
-        .attr('rx', d.isThesis ? 24 : 20)
-        .attr('ry', d.isThesis ? 24 : 20)
-        .attr('fill', d.isThesis ? '#4f46e5' : '#ffffff')
-        .attr('stroke', d.isThesis ? '#4338ca' : '#6366f1')
-        .attr('stroke-width', d.isThesis ? 3 : 2)
-        .style('filter', 'drop-shadow(0px 3px 8px rgba(0,0,0,0.12))')
+        .attr('rx', d.isThesis ? 0 : 0)
+        .attr('ry', d.isThesis ? 0 : 0)
+        .attr('fill', d.isThesis ? '#1f2937' : '#ffffff')
+        .attr('stroke', d.isThesis ? '#1f2937' : '#d1d5db')
+        .attr('stroke-width', d.isThesis ? 2 : 1)
+        .style('filter', 'none')
         .style('cursor', d.isThesis ? 'default' : 'pointer')
         .style('transition', 'all 0.2s ease')
         .attr('opacity', 0);
@@ -183,8 +167,8 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
             d3.select(this)
               .transition()
               .duration(200)
-              .attr('stroke-width', 3)
-              .style('filter', 'drop-shadow(0px 6px 16px rgba(99, 102, 241, 0.3))');
+              .attr('stroke', '#6b7280')
+              .attr('stroke-width', 2);
 
             setHoveredIdea(d.id);
           })
@@ -192,8 +176,8 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
             d3.select(this)
               .transition()
               .duration(200)
-              .attr('stroke-width', 2)
-              .style('filter', 'drop-shadow(0px 3px 8px rgba(0,0,0,0.12))');
+              .attr('stroke', '#d1d5db')
+              .attr('stroke-width', 1);
 
             setHoveredIdea(null);
           })
@@ -246,9 +230,9 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
 
   return (
     <div className="my-8">
-      <div className="bg-gradient-to-br from-slate-50 to-indigo-50/30 rounded-xl border border-slate-200 p-8">
+      <div className="bg-white border border-gray-200 p-8">
         <div className="text-center mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">Semantic Graph</h3>
+          <h3 className="text-sm font-serif text-gray-900 mb-1">Semantic Graph</h3>
           <p className="text-xs text-gray-500">
             Click on any idea to see details
           </p>
@@ -260,14 +244,14 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
 
       {/* Detail panel */}
       {selectedIdeaData && (
-        <div className="mt-4 bg-white rounded-xl border-2 border-primary-300 p-6 shadow-lg">
-          <div className="flex items-start justify-between mb-4">
-            <h4 className="text-lg font-semibold text-gray-900 flex-1">
+        <div className="mt-4 bg-white border border-gray-300 p-6">
+          <div className="flex items-start justify-between mb-4 pb-4 border-b border-gray-200">
+            <h4 className="text-xl font-serif text-gray-900 flex-1 leading-tight">
               {selectedIdeaData.title}
             </h4>
             <button
               onClick={() => setSelectedIdea(null)}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="text-gray-400 hover:text-gray-900 transition-colors ml-4"
               aria-label="Close"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -276,15 +260,15 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <h5 className="text-sm font-semibold text-gray-700 mb-2">Summary</h5>
+              <h5 className="text-xs uppercase tracking-wider text-gray-500 mb-3">Summary</h5>
               <div className="notion-content prose prose-sm max-w-none">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
                     p: ({ children }) => (
-                      <p className="text-sm leading-relaxed mb-3 text-gray-700">{children}</p>
+                      <p className="text-sm leading-relaxed mb-3 text-gray-700 font-light">{children}</p>
                     ),
                     strong: ({ children }) => (
                       <strong className="font-semibold text-gray-900">{children}</strong>
@@ -300,14 +284,14 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
             </div>
 
             {selectedIdeaData.actionable_takeaway && (
-              <div>
-                <h5 className="text-sm font-semibold text-gray-700 mb-2">Actionable Takeaway</h5>
+              <div className="pt-6 border-t border-gray-200">
+                <h5 className="text-xs uppercase tracking-wider text-gray-500 mb-3">Actionable Takeaway</h5>
                 <div className="notion-content prose prose-sm max-w-none">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={{
                       p: ({ children }) => (
-                        <p className="text-sm leading-relaxed mb-3 text-gray-700">{children}</p>
+                        <p className="text-sm leading-relaxed mb-3 text-gray-700 font-light">{children}</p>
                       ),
                       strong: ({ children }) => (
                         <strong className="font-semibold text-gray-900">{children}</strong>
@@ -322,7 +306,7 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
                         <ul className="list-disc pl-5 space-y-1 text-sm text-gray-700">{children}</ul>
                       ),
                       li: ({ children }) => (
-                        <li className="text-sm text-gray-700">{children}</li>
+                        <li className="text-sm text-gray-700 font-light">{children}</li>
                       ),
                     }}
                   >

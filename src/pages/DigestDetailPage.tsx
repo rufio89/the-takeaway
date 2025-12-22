@@ -6,14 +6,14 @@ import { supabase } from '../lib/supabase';
 import { IdeaCard } from '../components/IdeaCard';
 import { IdeaMap } from '../components/IdeaMap';
 import type { DigestWithIdeas } from '../types/database';
-import { Loader2, ArrowLeft, Calendar } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 
 export function DigestDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [digest, setDigest] = useState<DigestWithIdeas | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'map' | 'ideas'>('map');
+  const [activeTab, setActiveTab] = useState<'map' | 'ideas'>('ideas');
 
   useEffect(() => {
     if (id) {
@@ -48,9 +48,11 @@ export function DigestDetailPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+      <div className="min-h-screen bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+          </div>
         </div>
       </div>
     );
@@ -58,14 +60,16 @@ export function DigestDetailPage() {
 
   if (error || !digest) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800 mb-4">
-          {error || 'Digest not found'}
+      <div className="min-h-screen bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="border border-gray-300 p-6 text-gray-900 mb-6">
+            {error || 'Article not found'}
+          </div>
+          <Link to="/" className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            All Articles
+          </Link>
         </div>
-        <Link to="/" className="text-primary-600 hover:text-primary-700 flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4" />
-          Back to all digests
-        </Link>
       </div>
     );
   }
@@ -77,106 +81,118 @@ export function DigestDetailPage() {
   });
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <Link
-        to="/"
-        className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to all digests
-      </Link>
+    <div className="min-h-screen bg-white">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-8 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          All Articles
+        </Link>
 
-      <div className="mb-8">
-        <div className="flex items-center gap-2 text-gray-600 mb-3">
-          <Calendar className="w-4 h-4" />
-          <span>{formattedDate}</span>
-        </div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">{digest.title}</h1>
-        {digest.description && (
-          <div className="notion-content text-lg">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                p: ({ children }) => (
-                  <p className="text-[17px] leading-[1.6] mb-[1em] text-gray-700">{children}</p>
-                ),
-                strong: ({ children }) => (
-                  <strong className="font-semibold text-gray-900">{children}</strong>
-                ),
-                em: ({ children }) => (
-                  <em className="italic">{children}</em>
-                ),
-                a: ({ children, href }) => (
-                  <a href={href} className="text-primary-600 underline hover:text-primary-700" target="_blank" rel="noopener noreferrer">{children}</a>
-                ),
-                ul: ({ children }) => (
-                  <ul className="my-[0.5em] pl-[1.5em] space-y-[0.25em] list-disc">{children}</ul>
-                ),
-                ol: ({ children }) => (
-                  <ol className="my-[0.5em] pl-[1.5em] space-y-[0.25em] list-decimal">{children}</ol>
-                ),
-                li: ({ children }) => (
-                  <li className="text-[17px] leading-[1.6] text-gray-700 pl-[0.25em] marker:text-gray-600">{children}</li>
-                ),
-                hr: () => <hr className="my-[2em] border-t border-gray-200" />,
-                br: () => <br />,
-              }}
-            >
-              {digest.description}
-            </ReactMarkdown>
+        <article className="mb-12">
+          <div className="text-xs text-gray-500 uppercase tracking-wider mb-4">
+            {formattedDate}
           </div>
-        )}
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200 mb-8">
-        <nav className="flex gap-8" aria-label="Tabs">
-          <button
-            onClick={() => setActiveTab('map')}
-            className={`
-              pb-4 px-1 border-b-2 font-medium text-sm transition-colors
-              ${activeTab === 'map'
-                ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }
-            `}
-          >
-            Semantic Graph
-          </button>
-          <button
-            onClick={() => setActiveTab('ideas')}
-            className={`
-              pb-4 px-1 border-b-2 font-medium text-sm transition-colors
-              ${activeTab === 'ideas'
-                ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }
-            `}
-          >
-            Key Ideas ({digest.ideas?.length || 0})
-          </button>
-        </nav>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === 'map' ? (
-        <IdeaMap
-          thesis={digest.title}
-          ideas={digest.ideas || []}
-        />
-      ) : (
-        <div className="space-y-8">
-          {digest.ideas && digest.ideas.length > 0 ? (
-            <div className="space-y-8">
-              {digest.ideas.map((idea) => <IdeaCard key={idea.id} idea={idea} />)}
-            </div>
-          ) : (
-            <div className="bg-gray-100 rounded-lg p-8 text-center">
-              <p className="text-gray-600">No ideas in this digest yet.</p>
+          <h1 className="text-5xl font-serif text-gray-900 mb-6 leading-tight tracking-tight">
+            {digest.title}
+          </h1>
+          {digest.description && (
+            <div className="notion-content text-lg border-b border-gray-200 pb-8">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  p: ({ children }) => (
+                    <p className="text-[17px] leading-[1.7] mb-[1.2em] text-gray-700 font-light">{children}</p>
+                  ),
+                  strong: ({ children }) => (
+                    <strong className="font-semibold text-gray-900">{children}</strong>
+                  ),
+                  em: ({ children }) => (
+                    <em className="italic">{children}</em>
+                  ),
+                  a: ({ children, href }) => (
+                    <a href={href} className="text-gray-900 underline hover:text-gray-600" target="_blank" rel="noopener noreferrer">{children}</a>
+                  ),
+                  ul: ({ children }) => (
+                    <ul className="my-[1em] pl-[1.5em] space-y-[0.5em] list-disc">{children}</ul>
+                  ),
+                  ol: ({ children }) => (
+                    <ol className="my-[1em] pl-[1.5em] space-y-[0.5em] list-decimal">{children}</ol>
+                  ),
+                  li: ({ children }) => (
+                    <li className="text-[17px] leading-[1.7] text-gray-700 font-light pl-[0.25em] marker:text-gray-600">{children}</li>
+                  ),
+                  hr: () => <hr className="my-[2em] border-t border-gray-200" />,
+                  br: () => <br />,
+                }}
+              >
+                {digest.description}
+              </ReactMarkdown>
             </div>
           )}
+        </article>
+
+        {/* Tabs */}
+        <div className="border-b border-gray-200 mb-12">
+          <nav className="flex gap-8" aria-label="Tabs">
+            <button
+              onClick={() => setActiveTab('ideas')}
+              className={`
+                pb-4 px-1 border-b-2 text-sm transition-colors
+                ${activeTab === 'ideas'
+                  ? 'border-gray-900 text-gray-900 font-medium'
+                  : 'border-transparent text-gray-500 hover:text-gray-900'
+                }
+              `}
+            >
+              Key Ideas ({digest.ideas?.length || 0})
+            </button>
+            <button
+              onClick={() => setActiveTab('map')}
+              className={`
+                pb-4 px-1 border-b-2 text-sm transition-colors
+                ${activeTab === 'map'
+                  ? 'border-gray-900 text-gray-900 font-medium'
+                  : 'border-transparent text-gray-500 hover:text-gray-900'
+                }
+              `}
+            >
+              Semantic Graph
+            </button>
+          </nav>
         </div>
-      )}
+
+        {/* Tab Content */}
+        {activeTab === 'ideas' ? (
+          <div className="space-y-4">
+            {digest.ideas && digest.ideas.length > 0 ? (
+              <div className="space-y-4">
+                {[...digest.ideas]
+                  .sort((a, b) => (b.clarity_score || 0) - (a.clarity_score || 0))
+                  .map((idea, index) => (
+                    <IdeaCard
+                      key={idea.id}
+                      idea={idea}
+                      defaultExpanded={index < 2}
+                    />
+                  ))
+                }
+              </div>
+            ) : (
+              <div className="border border-gray-200 p-8 text-center">
+                <p className="text-gray-600 text-sm">No ideas in this article yet.</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <IdeaMap
+            thesis={digest.title}
+            ideas={digest.ideas || []}
+          />
+        )}
+      </div>
     </div>
   );
 }

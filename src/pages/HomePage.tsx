@@ -58,19 +58,15 @@ export function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="mb-12">
-          <div className="inline-block mb-4">
-            <span className="bg-gradient-to-r from-primary-500 to-primary-600 text-white text-sm font-semibold px-4 py-1.5 rounded-full shadow-sm">
-              📚 Latest Digests
-            </span>
-          </div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-3 leading-tight">
-            High-Signal Podcast Insights
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="mb-16 border-b border-gray-200 pb-8">
+          <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">Latest</p>
+          <h2 className="text-5xl font-serif text-gray-900 mb-4 leading-tight tracking-tight">
+            Podcast Insights
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl">
-            Curated collections of actionable ideas, compressed and scored for clarity
+          <p className="text-lg text-gray-600 max-w-2xl font-light">
+            Curated ideas, compressed for clarity
           </p>
         </div>
 
