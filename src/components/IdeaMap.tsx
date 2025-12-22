@@ -24,8 +24,10 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
     // Clear previous render
     d3.select(svgRef.current).selectAll('*').remove();
 
-    const width = 900;
-    const height = 500;
+    // Responsive sizing based on viewport width
+    const isMobile = window.innerWidth < 768;
+    const width = isMobile ? 600 : 900;
+    const height = isMobile ? 800 : 500;
     const centerX = width / 2;
     const centerY = height / 2;
 
@@ -40,7 +42,7 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
 
     // Calculate positions for a clean radial layout
     const angleStep = (2 * Math.PI) / ideas.length;
-    const radius = 180;
+    const radius = isMobile ? 220 : 180;
 
     // Create node data
     const nodes = [
@@ -86,9 +88,14 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
     nodeGroups.each(function(d) {
       const node = d3.select(this);
       const words = d.label.split(' ');
-      const maxWidth = d.isThesis ? 180 : 140;
-      const lineHeight = 1.3;
-      const fontSize = d.isThesis ? 16 : 13;
+      const isMobile = window.innerWidth < 768;
+      const maxWidth = isMobile
+        ? (d.isThesis ? 200 : 160)
+        : (d.isThesis ? 180 : 140);
+      const lineHeight = 1.4;
+      const fontSize = isMobile
+        ? (d.isThesis ? 18 : 15)
+        : (d.isThesis ? 16 : 13);
 
       let line: string[] = [];
       let lines: string[] = [];
@@ -140,9 +147,12 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
     nodeGroups.each(function(d, i) {
       const node = d3.select(this);
       const data = textData[i];
-      const padding = d.isThesis ? 24 : 20;
+      const isMobile = window.innerWidth < 768;
+      const padding = isMobile
+        ? (d.isThesis ? 28 : 24)
+        : (d.isThesis ? 24 : 20);
       const bubbleWidth = data.width + padding * 2;
-      const bubbleHeight = data.height + padding * 2;
+      const bubbleHeight = data.height + padding * 2.2;
 
       // Rounded rectangle bubble
       const rect = node.insert('rect', ':first-child')
@@ -198,8 +208,11 @@ export function IdeaMap({ thesis, ideas }: IdeaMapProps) {
     nodeGroups.each(function(d, i) {
       const node = d3.select(this);
       const data = textData[i];
-      const fontSize = d.isThesis ? 16 : 13;
-      const lineHeight = 1.3;
+      const isMobile = window.innerWidth < 768;
+      const fontSize = isMobile
+        ? (d.isThesis ? 18 : 15)
+        : (d.isThesis ? 16 : 13);
+      const lineHeight = 1.4;
 
       const textGroup = node.append('text')
         .attr('text-anchor', 'middle')
