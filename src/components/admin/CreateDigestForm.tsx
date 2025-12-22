@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Check, Loader2 } from 'lucide-react';
+import { useToast } from '../../hooks/useToast';
+import { Loader2 } from 'lucide-react';
 
 interface CreateDigestFormProps {
   onSuccess: () => void;
@@ -15,14 +16,11 @@ export function CreateDigestForm({ onSuccess }: CreateDigestFormProps) {
   );
   const [featured, setFeatured] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccess(false);
 
     try {
       const { error } = await supabase.from('digests').insert({
@@ -35,17 +33,15 @@ export function CreateDigestForm({ onSuccess }: CreateDigestFormProps) {
 
       if (error) throw error;
 
-      setSuccess(true);
+      toast.success('Digest created', `"${title}" has been published`);
       setTitle('');
       setDescription('');
       setImageUrl('');
       setPublishedDate(new Date().toISOString().split('T')[0]);
       setFeatured(false);
       onSuccess();
-
-      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create digest');
+      toast.error('Failed to create digest', err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -130,19 +126,6 @@ export function CreateDigestForm({ onSuccess }: CreateDigestFormProps) {
           Featured digest
         </label>
       </div>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md text-sm">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md text-sm flex items-center gap-2">
-          <Check className="w-4 h-4" />
-          Digest created successfully!
-        </div>
-      )}
 
       <button
         type="submit"

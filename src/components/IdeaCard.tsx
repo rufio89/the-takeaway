@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { ShareButton } from './ShareButton';
 import type { Idea, Podcast, Category } from '../types/database';
 
 interface IdeaCardProps {
@@ -24,7 +26,15 @@ export function IdeaCard({ idea, defaultExpanded = false }: IdeaCardProps) {
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-3 text-xs text-gray-500 uppercase tracking-wider mb-3">
-              {idea.category && <span>{idea.category.name}</span>}
+              {idea.category && (
+                <Link
+                  to={`/category/${idea.category.slug}`}
+                  onClick={(e) => e.stopPropagation()}
+                  className="hover:text-gray-900 hover:underline transition-colors"
+                >
+                  {idea.category.name}
+                </Link>
+              )}
               {idea.category && idea.clarity_score && <span>•</span>}
               {idea.clarity_score && <span>Clarity: {idea.clarity_score}/10</span>}
             </div>
@@ -122,24 +132,41 @@ export function IdeaCard({ idea, defaultExpanded = false }: IdeaCardProps) {
           </div>
         )}
 
-            <div className="flex items-center gap-3 pt-6 mt-6 border-t border-gray-200 text-xs text-gray-500">
-              {idea.podcast && (
-                <>
-                  <span>{idea.podcast.name}</span>
-                  {idea.podcast.host && (
-                    <>
-                      <span>•</span>
-                      <span>{idea.podcast.host}</span>
-                    </>
-                  )}
-                </>
-              )}
-              {idea.timestamp && (
-                <>
-                  {idea.podcast && <span>•</span>}
-                  <span>{idea.timestamp}</span>
-                </>
-              )}
+            <div className="flex items-center justify-between pt-6 mt-6 border-t border-gray-200">
+              <div className="flex items-center gap-3 text-xs text-gray-500">
+                {idea.podcast && (
+                  <>
+                    <span>{idea.podcast.name}</span>
+                    {idea.podcast.host && (
+                      <>
+                        <span>•</span>
+                        <span>{idea.podcast.host}</span>
+                      </>
+                    )}
+                  </>
+                )}
+                {idea.timestamp && (
+                  <>
+                    {idea.podcast && <span>•</span>}
+                    <span>{idea.timestamp}</span>
+                  </>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {idea.category && (
+                  <Link
+                    to={`/category/${idea.category.slug}`}
+                    className="text-xs text-gray-500 hover:text-gray-700 hover:underline transition-colors"
+                  >
+                    More {idea.category.name}
+                  </Link>
+                )}
+                <ShareButton
+                  title={idea.title}
+                  url={`#idea-${idea.id}`}
+                  description={idea.summary?.slice(0, 280)}
+                />
+              </div>
             </div>
           </div>
         </div>

@@ -23,21 +23,56 @@ const supabase = createClient(
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+// Store for SSE connections
+const progressConnections = new Map();
+
+// SSE endpoint for progress updates
+app.get('/api/process-transcript/progress/:jobId', (req, res) => {
+  const { jobId } = req.params;
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  // Send initial connection message
+  res.write(`data: ${JSON.stringify({ stage: 'connected', progress: 0, message: 'Connected' })}\n\n`);
+
+  // Store the response object for sending progress updates
+  progressConnections.set(jobId, (data) => {
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  });
+
+  // Clean up on connection close
+  req.on('close', () => {
+    progressConnections.delete(jobId);
+  });
+});
+
 // Health check endpoint
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', message: 'The Takeaway API is running' });
 });
 
+// Helper to emit progress
+function emitProgress(jobId, stage, progress, message) {
+  const emit = progressConnections.get(jobId);
+  if (emit) {
+    emit({ stage, progress, message });
+  }
+}
+
 // Process transcript endpoint
 app.post('/api/process-transcript', async (req, res) => {
   try {
-    const { transcript, podcastId, podcastName, podcastHost, digestTitle, digestImageUrl } = req.body;
+    const { transcript, podcastId, podcastName, podcastHost, digestTitle, digestImageUrl, jobId } = req.body;
 
     if (!transcript) {
       return res.status(400).json({ error: 'Transcript is required' });
     }
 
     console.log('Processing transcript...');
+    emitProgress(jobId, 'sending', 5, 'Sending transcript to Claude...');
 
     // Call Claude API to extract ideas
     const message = await anthropic.messages.create({
@@ -91,6 +126,7 @@ Respond ONLY with valid JSON in this exact format:
     let responseText = message.content[0].text;
     console.log('Claude response received');
     console.log('Raw response:', responseText.substring(0, 500)); // Log first 500 chars
+    emitProgress(jobId, 'analyzing', 40, 'Analyzing response...');
 
     // Remove markdown code blocks if present
     responseText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
@@ -104,6 +140,7 @@ Respond ONLY with valid JSON in this exact format:
     console.log('Parsed thesis:', thesis);
     console.log('Parsed description:', generatedDescription);
     console.log('Ideas count:', ideas?.length);
+    emitProgress(jobId, 'extracting', 60, `Extracted ${ideas?.length || 0} ideas`);
 
     if (!ideas || ideas.length === 0) {
       return res.status(400).json({ error: 'No ideas extracted from transcript' });
@@ -129,6 +166,8 @@ Respond ONLY with valid JSON in this exact format:
       podcast = newPodcast;
     }
 
+    emitProgress(jobId, 'saving', 75, 'Creating digest...');
+
     // Create digest with AI-generated title and description
     const { data: newDigest, error: digestError } = await supabase
       .from('digests')
@@ -146,6 +185,7 @@ Respond ONLY with valid JSON in this exact format:
     }
 
     console.log(`Created digest: ${newDigest.title}`);
+    emitProgress(jobId, 'saving', 85, 'Saving ideas...');
 
     // Get categories map
     const { data: categories } = await supabase.from('categories').select('*');
@@ -176,6 +216,7 @@ Respond ONLY with valid JSON in this exact format:
     }
 
     console.log(`Successfully extracted and saved ${insertedIdeas.length} ideas`);
+    emitProgress(jobId, 'complete', 100, `Created ${insertedIdeas.length} ideas`);
 
     res.json({
       success: true,
@@ -186,6 +227,7 @@ Respond ONLY with valid JSON in this exact format:
     });
   } catch (error) {
     console.error('Error processing transcript:', error);
+    emitProgress(req.body.jobId, 'error', 0, error.message);
     res.status(500).json({
       error: 'Failed to process transcript',
       details: error.message,

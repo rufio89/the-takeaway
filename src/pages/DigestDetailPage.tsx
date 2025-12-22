@@ -5,6 +5,8 @@ import remarkGfm from 'remark-gfm';
 import { supabase } from '../lib/supabase';
 import { IdeaCard } from '../components/IdeaCard';
 import { IdeaMap } from '../components/IdeaMap';
+import { ShareButton } from '../components/ShareButton';
+import { ExportButton } from '../components/ExportButton';
 import type { DigestWithIdeas } from '../types/database';
 import { Loader2, ArrowLeft } from 'lucide-react';
 
@@ -92,8 +94,18 @@ export function DigestDetailPage() {
         </Link>
 
         <article className="mb-12">
-          <div className="text-xs text-gray-500 uppercase tracking-wider mb-4">
-            {formattedDate}
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-xs text-gray-500 uppercase tracking-wider">
+              {formattedDate}
+            </div>
+            <div className="flex items-center gap-2">
+              <ShareButton
+                title={digest.title}
+                url={`/digest/${digest.id}`}
+                description={digest.description?.slice(0, 280)}
+              />
+              <ExportButton digest={digest} />
+            </div>
           </div>
           <h1 className="text-5xl font-serif text-gray-900 mb-6 leading-tight tracking-tight">
             {digest.title}

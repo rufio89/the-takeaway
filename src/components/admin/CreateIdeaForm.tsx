@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Check, Loader2 } from 'lucide-react';
+import { useToast } from '../../hooks/useToast';
+import { Loader2 } from 'lucide-react';
 import type { Digest, Podcast, Category } from '../../types/database';
 
 interface CreateIdeaFormProps {
@@ -20,14 +21,11 @@ export function CreateIdeaForm({ digests, podcasts, categories, onSuccess }: Cre
   const [clarityScore, setClarityScore] = useState(8);
   const [timestamp, setTimestamp] = useState('');
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccess(false);
 
     try {
       const { error } = await supabase.from('ideas').insert({
@@ -43,17 +41,15 @@ export function CreateIdeaForm({ digests, podcasts, categories, onSuccess }: Cre
 
       if (error) throw error;
 
-      setSuccess(true);
+      toast.success('Idea added', `"${title}" has been saved`);
       setTitle('');
       setSummary('');
       setActionableTakeaway('');
       setClarityScore(8);
       setTimestamp('');
       onSuccess();
-
-      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create idea');
+      toast.error('Failed to add idea', err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -210,19 +206,6 @@ export function CreateIdeaForm({ digests, podcasts, categories, onSuccess }: Cre
           />
         </div>
       </div>
-
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-md text-sm">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-md text-sm flex items-center gap-2">
-          <Check className="w-4 h-4" />
-          Idea added successfully!
-        </div>
-      )}
 
       <button
         type="submit"

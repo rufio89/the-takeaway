@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
+import { useToast } from '../../hooks/useToast';
+import { TranscriptProgress, type ProgressState } from './TranscriptProgress';
 import type { Podcast } from '../../types/database';
 
 interface ProcessTranscriptFormProps {
@@ -14,16 +16,40 @@ export function ProcessTranscriptForm({ podcasts, onSuccess }: ProcessTranscript
   const [digestTitle, setDigestTitle] = useState('');
   const [digestImageUrl, setDigestImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<{ ideasCount: number; digestTitle: string } | null>(null);
+  const [progress, setProgress] = useState<ProgressState | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const toast = useToast();
+
+  const cleanupEventSource = useCallback(() => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccess(null);
+    setProgress({ stage: 'sending', progress: 0, message: 'Starting...' });
+
+    // Generate a unique job ID for SSE progress tracking
+    const jobId = crypto.randomUUID();
 
     try {
+      // Set up SSE connection for progress updates
+      const eventSource = new EventSource(`http://localhost:3001/api/process-transcript/progress/${jobId}`);
+      eventSourceRef.current = eventSource;
+
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        setProgress(data);
+      };
+
+      eventSource.onerror = () => {
+        cleanupEventSource();
+      };
+
+      // Make the API request
       const response = await fetch('http://localhost:3001/api/process-transcript', {
         method: 'POST',
         headers: {
@@ -31,6 +57,7 @@ export function ProcessTranscriptForm({ podcasts, onSuccess }: ProcessTranscript
         },
         body: JSON.stringify({
           transcript,
+          jobId,
           podcastId: podcastId && podcastId !== 'new' ? podcastId : undefined,
           podcastName: newPodcastName || undefined,
           podcastHost: newPodcastHost || undefined,
@@ -39,16 +66,19 @@ export function ProcessTranscriptForm({ podcasts, onSuccess }: ProcessTranscript
         }),
       });
 
+      cleanupEventSource();
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to process transcript');
       }
 
       const result = await response.json();
-      setSuccess({
-        ideasCount: result.ideasCount,
-        digestTitle: result.digest?.title || 'Unknown',
-      });
+
+      toast.success(
+        'Transcript processed',
+        `Created "${result.digest?.title}" with ${result.ideasCount} ideas`
+      );
 
       // Reset form
       setTranscript('');
@@ -61,9 +91,13 @@ export function ProcessTranscriptForm({ podcasts, onSuccess }: ProcessTranscript
       // Refresh data
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      cleanupEventSource();
+      setProgress({ stage: 'error', progress: 0, message: err instanceof Error ? err.message : 'An error occurred' });
+      toast.error('Processing failed', err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
+      // Clear progress after a delay
+      setTimeout(() => setProgress(null), 3000);
     }
   }
 
@@ -79,21 +113,7 @@ export function ProcessTranscriptForm({ podcasts, onSuccess }: ProcessTranscript
         </p>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-sm text-red-800">
-            <strong>Error:</strong> {error}
-          </p>
-        </div>
-      )}
-
-      {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-          <p className="text-sm text-green-800">
-            <strong>Success!</strong> Created digest "{success.digestTitle}" with {success.ideasCount} ideas
-          </p>
-        </div>
-      )}
+      {progress && <TranscriptProgress progress={progress} />}
 
       <div>
         <label htmlFor="transcript" className="block text-sm font-medium text-gray-700 mb-2">
