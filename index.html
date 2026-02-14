@@ -2,9 +2,45 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>the-takeaway</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Viewport & Mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#1f2937" />
+    <meta name="description" content="Transform long-form podcast conversations into curated digests of high-signal ideas" />
+    
+    <!-- PWA Support -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="The Takeaway" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    
+    <!-- Offline Support -->
+    <meta name="offline-page" content="/index.html" />
+    
+    <!-- Open Graph for sharing -->
+    <meta property="og:title" content="The Takeaway" />
+    <meta property="og:description" content="Transform long-form podcast conversations into curated digests of high-signal ideas" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://the-takeaway.app/" />
+    <meta property="og:image" content="/icon-512.png" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Takeaway" />
+    <meta name="twitter:description" content="Transform long-form podcast conversations into curated digests of high-signal ideas" />
+    <meta name="twitter:image" content="/icon-512.png" />
+    
+    <!-- Preconnect to APIs -->
+    <link rel="preconnect" href="https://supabase.co" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    
+    <title>The Takeaway - Podcast Digests</title>
   </head>
   <body>
     <div id="root"></div>
