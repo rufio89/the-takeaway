@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { DarkModeProvider } from './contexts/DarkModeContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { ToastContainer } from './components/ui/ToastContainer';
 import { Layout } from './components/Layout';
@@ -12,8 +13,9 @@ import { LoginPage } from './pages/LoginPage';
 
 function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
+    <DarkModeProvider>
+      <AuthProvider>
+        <ToastProvider>
         <Router>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
@@ -34,7 +36,8 @@ function App() {
         </Router>
         <ToastContainer />
       </ToastProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </DarkModeProvider>
   );
 }
 

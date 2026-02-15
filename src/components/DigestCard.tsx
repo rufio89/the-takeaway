@@ -43,13 +43,13 @@ export function DigestCard({ digest }: DigestCardProps) {
       to={`/digest/${digest.id}`}
       className={`block transition-all duration-200 group ${
         isFeatured
-          ? 'bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 hover:border-amber-400 shadow-md hover:shadow-lg'
-          : 'bg-white border border-gray-200 hover:border-gray-400'
+          ? 'bg-gradient-to-br from-amber-50 dark:from-amber-900/20 to-orange-50 dark:to-orange-900/10 border-2 border-amber-200 dark:border-amber-700 hover:border-amber-400 dark:hover:border-amber-600 shadow-md hover:shadow-lg dark:shadow-lg'
+          : 'bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:border-gray-400 dark:hover:border-gray-700 transition-colors'
       }`}
     >
       {/* Cover Image with Placeholder Fallback */}
-      <div className={`relative h-56 overflow-hidden border-b ${
-        isFeatured ? 'border-amber-200' : 'border-gray-200'
+      <div className={`relative h-56 overflow-hidden border-b transition-colors ${
+        isFeatured ? 'border-amber-200 dark:border-amber-700' : 'border-gray-200 dark:border-gray-800'
       }`}>
         {digest.image_url ? (
           <img
@@ -82,16 +82,16 @@ export function DigestCard({ digest }: DigestCardProps) {
       </div>
 
       {/* Content */}
-      <div className={`p-8 ${isFeatured ? 'bg-gradient-to-br from-amber-50/50 to-transparent' : ''}`}>
+      <div className={`p-8 transition-colors ${isFeatured ? 'bg-gradient-to-br from-amber-50/50 dark:from-amber-900/10 to-transparent' : ''}`}>
         {podcasts.length > 0 && (
-          <div className={`text-xs font-medium uppercase tracking-wider mb-2 ${
-            isFeatured ? 'text-amber-700' : 'text-gray-700'
+          <div className={`text-xs font-medium uppercase tracking-wider mb-2 transition-colors ${
+            isFeatured ? 'text-amber-700 dark:text-amber-300' : 'text-gray-700 dark:text-gray-300'
           }`}>
             {podcasts.join(' • ')}
           </div>
         )}
-        <div className={`flex items-center gap-2 text-xs uppercase tracking-wider mb-3 ${
-          isFeatured ? 'text-amber-600' : 'text-gray-500'
+        <div className={`flex items-center gap-2 text-xs uppercase tracking-wider mb-3 transition-colors ${
+          isFeatured ? 'text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'
         }`}>
           <span>{formattedDate}</span>
           {categories.length > 0 && (
@@ -102,24 +102,24 @@ export function DigestCard({ digest }: DigestCardProps) {
           )}
         </div>
 
-        <h3 className={`text-2xl font-serif mb-3 leading-tight tracking-tight ${
-          isFeatured ? 'text-amber-900' : 'text-gray-900'
+        <h3 className={`text-2xl font-serif mb-3 leading-tight tracking-tight transition-colors ${
+          isFeatured ? 'text-amber-900 dark:text-amber-100' : 'text-gray-900 dark:text-white'
         }`}>
           {digest.title}
         </h3>
 
         {digest.description && (
-          <p className={`text-sm mb-4 line-clamp-3 leading-relaxed font-light ${
-            isFeatured ? 'text-amber-800' : 'text-gray-600'
+          <p className={`text-sm mb-4 line-clamp-3 leading-relaxed font-light transition-colors ${
+            isFeatured ? 'text-amber-800 dark:text-amber-200' : 'text-gray-600 dark:text-gray-400'
           }`}>
             {digest.description}
           </p>
         )}
 
-        <div className={`flex items-center gap-4 text-xs pt-4 border-t ${
+        <div className={`flex items-center gap-4 text-xs pt-4 border-t transition-colors ${
           isFeatured 
-            ? 'border-amber-200 text-amber-700' 
-            : 'border-gray-200 text-gray-500'
+            ? 'border-amber-200 dark:border-amber-700 text-amber-700 dark:text-amber-300' 
+            : 'border-gray-200 dark:border-gray-800 text-gray-500 dark:text-gray-400'
         }`}>
           <span>{ideaCount} ideas</span>
           <span>•</span>
